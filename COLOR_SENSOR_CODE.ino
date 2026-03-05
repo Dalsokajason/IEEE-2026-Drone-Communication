@@ -3,31 +3,20 @@
 #include <Wire.h>
 #include "Adafruit_TCS34725.h"
 
-
-
-
 Adafruit_TCS34725 tcs(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
 
-
-
-
 enum Color { RED, GREEN, BLUE, PURPLE, UNKNOWN };
-
-
-
+const int confidenceValue = 5;
+Color colorRecord[confidenceValue];
+Color colorDetected;
+int cycle = 0;
 
 Color classify(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
   if (c < 50) return UNKNOWN;
 
-
-
-
   float rn = (float)r / c;
   float gn = (float)g / c;
   float bn = (float)b / c;
-
-
-
 
   // i put purple first to try to get it to recognize purple before blue
   //try changing the bn, rn & gn to identify purple better
@@ -42,26 +31,16 @@ Color classify(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
  and red would have more red then green and red
  ** I got rid of the +.10 for them since sometimes they might be similar */
 
-
   if (bn > 0.3 && rn > 0.3 && gn > 0.3) return PURPLE ;
-
 
   else if (gn > 0.35 && gn >= rn  && gn >= bn) return GREEN;
 
-
   else if (bn >= 0.35 && bn >= rn && bn >= gn) return BLUE;
 
-
   else if (rn > 0.35 && rn >= gn  && rn >= bn ) return RED;
-
-
- 
  
   else return UNKNOWN;
 }
-
-
-
 
 const char* colorName(Color c) {
   switch (c) {
@@ -73,69 +52,72 @@ const char* colorName(Color c) {
   }
 }
 
-
-
+boolean confirmColor(Color colorRecord[]) {
+  //If we have recorded the color the amount of times equal to the confidence value,
+  //loop through the color record and check if all colors in the color record are
+  //the same. If they are, then the color is confirmed.
+  Color previousColor = colorRecord[0];
+  //We cycle the amount of times as the confidenceValue i.e. length of the colorRecord.
+  for(int i = 1; i < confidenceValue; i++){
+    if((colorRecord[i] == previousColor) && (previousColor != UNKNOWN)){
+      previousColor = colorRecord[i];
+      //Are we at the end of the array?
+      if(i == confidenceValue - 1){
+        //Color confirmed.
+        return true;
+      }
+    }
+    else {
+      return false;
+    }
+  }
+  return false;
+}
 
 void setup() {
   Serial.begin(115200);
   delay(300);
 
-
-
-
   if (!tcs.begin()) {
     Serial.println("TCS34725 not found.");
     while (1) delay(10);
   }
-
-
-
-
+  
   Serial.println("TCS34725 ready.");
 }
-
-
-
 
 void loop() {
   uint16_t r, g, b, c;
   tcs.getRawData(&r, &g, &b, &c);
 
-
-
-
   Color col = classify(r, g, b, c);
-
-
-
-
+  
   float rn = (c ? (float)r / c : 0);
   float gn = (c ? (float)g / c : 0);
   float bn = (c ? (float)b / c : 0);
-
-
-
 
   Serial.print("Raw R:"); Serial.print(r);
   Serial.print(" G:"); Serial.print(g);
   Serial.print(" B:"); Serial.print(b);
   Serial.print(" C:"); Serial.print(c);
 
-
-
-
   Serial.print(" | rn="); Serial.print(rn, 3);
   Serial.print(" gn="); Serial.print(gn, 3);
   Serial.print(" bn="); Serial.print(bn, 3);
 
-
-
-
-  Serial.print(" -> ");	
+  Serial.print(" -> ");
   Serial.println(colorName(col));
+  
+  colorRecord[cycle] = col;
 
+  if(cycle == confidenceValue - 1){
+    if(confirmColor(colorRecord)){
+    Serial.print("CONFIRMED COLOR:"); Serial.println(col);
+    }
+    cycle = 0;
+  }
 
-
-
+  cycle++;
+  
   delay(200);
 }
