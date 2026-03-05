@@ -107,12 +107,13 @@ void loop() {
 
   Serial.print(" -> ");
   Serial.println(colorName(col));
-  
+
+  //Record the color detected
   colorRecord[cycle] = col;
 
   if(cycle == confidenceValue - 1){
     if(confirmColor(colorRecord)){
-    Serial.print("CONFIRMED COLOR:"); Serial.println(colorName(col));
+    Serial.print("CONFIRMED COLOR:"); Serial.println(col);
     }
     cycle = 0;
   }
