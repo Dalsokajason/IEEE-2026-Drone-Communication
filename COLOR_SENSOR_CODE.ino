@@ -9,7 +9,9 @@ enum Color { RED, GREEN, BLUE, PURPLE, UNKNOWN };
 const int confidenceValue = 5;
 Color colorRecord[confidenceValue];
 Color colorDetected;
+String confirmedColor;
 int cycle = 0;
+
 
 Color classify(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
   if (c < 50) return UNKNOWN;
@@ -89,35 +91,36 @@ void setup() {
 void loop() {
   uint16_t r, g, b, c;
   tcs.getRawData(&r, &g, &b, &c);
-
+  
   Color col = classify(r, g, b, c);
   
   float rn = (c ? (float)r / c : 0);
   float gn = (c ? (float)g / c : 0);
   float bn = (c ? (float)b / c : 0);
-
+  
   Serial.print("Raw R:"); Serial.print(r);
   Serial.print(" G:"); Serial.print(g);
   Serial.print(" B:"); Serial.print(b);
   Serial.print(" C:"); Serial.print(c);
-
+  
   Serial.print(" | rn="); Serial.print(rn, 3);
   Serial.print(" gn="); Serial.print(gn, 3);
   Serial.print(" bn="); Serial.print(bn, 3);
-
+  
   Serial.print(" -> ");
   Serial.println(colorName(col));
 
   //Record the color detected
   colorRecord[cycle] = col;
-
+  
   if(cycle == confidenceValue - 1){
     if(confirmColor(colorRecord)){
     Serial.print("CONFIRMED COLOR:"); Serial.println(colorName(colorRecord[0]));
+    confirmedColor = colorName(colorRecord[0]);
     }
     cycle = 0;
   }
-
+  
   cycle++;
   
   delay(200);
