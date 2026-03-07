@@ -1,3 +1,4 @@
+//DO NOT USE, This code has been merged with TransmissionCode.ino Final version can be found at TransmissionCodeFinal.ino
 //check the serial monitor for the color it identifies use the same BAND number!!
 //you need to download the library adafruit from the arduino ide
 #include <Wire.h>
