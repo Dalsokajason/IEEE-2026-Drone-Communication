@@ -200,7 +200,7 @@ void loop() {
       if(confirmColor(colorRecord, col)){
         confirmedColor = colorName(colorRecord[0]);
         Serial.print("CONFIRMED COLOR:"); Serial.println(confirmedColor);
-        transmitData(confirmedColor, antennaCycle);
+        transmitData(confirmedColor, antennaID[antennaCycle]);
       }
       cycle = 0;
     }
@@ -222,3 +222,4 @@ void loop() {
     timerActive = false;
   }
 }
+
