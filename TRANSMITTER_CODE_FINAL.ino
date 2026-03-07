@@ -15,7 +15,7 @@ Color colorDetected;
 String confirmedColor;
 int cycle = 0; //Keeps track of how many colors we've read. Resets when it equals confidenceValue - 1
 int antennaCycle = 0; //tracks how many antenna we've read starting from zero. Use antennaID[antennaCycle] to get the actual antenna number.
-bool ENABLE = false;
+bool ENABLE = true;
 bool timerActive = false;
 unsigned long startTime = 0;
 unsigned long runDuration = 10000; // duration in ms (10 seconds)
@@ -201,6 +201,7 @@ void loop() {
         confirmedColor = colorName(colorRecord[0]);
         Serial.print("CONFIRMED COLOR:"); Serial.println(confirmedColor);
         transmitData(confirmedColor, antennaID[antennaCycle]);
+        
       }
       cycle = 0;
     }
@@ -217,10 +218,9 @@ void loop() {
     delay(200);
   }
 
-  // Stop when time expires
+  //Stop when time expires
   if (timerActive && millis() - startTime > runDuration) {
     timerActive = false;
+    //antennaCycle++;
   }
 }
-
-
