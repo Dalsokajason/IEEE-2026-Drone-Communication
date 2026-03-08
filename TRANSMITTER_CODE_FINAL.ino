@@ -41,7 +41,7 @@ Color classify(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
  green gn has to be higher then bn and rn the same for the other colors
  it makes sense right green would have more green then blue and red
  and red would have more red then green and red
- ** I got rid of the +.10 for them since sometimes they might be similar */
+ //I got rid of the +.10 for them since sometimes they might be similar */
 
   if (bn > 0.3 && rn > 0.3 && gn > 0.3) return PURPLE ;
 
@@ -102,7 +102,7 @@ esp_now_peer_info_t peerInfo;
 
 
 // callback when data is sent
-void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
+void OnDataSent(const wifi_tx_info_t *tax_info, esp_now_send_status_t status) {
   Serial.print("\r\nLast Packet Send Status:\t");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
 }
