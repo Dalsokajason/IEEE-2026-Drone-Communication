@@ -10,19 +10,19 @@ typedef struct struct_message {
 } struct_message;
 
 
-// Create a struct_message called Transmission
-struct_message Transmission;
+// Create a struct_message called transmission
+struct_message transmission;
 
 
 // callback function that will be executed when data is received
 void OnDataRecv(const esp_now_recv_info_t *info, const uint8_t *incomingData, int len) {
-  memcpy(&Transmission, incomingData, sizeof(Transmission));
+  memcpy(&transmission, incomingData, sizeof(transmission));
   Serial.print("Bytes received: ");
   Serial.println(len);
   Serial.print("Color Detected: ");
-  Serial.println(Transmission.color);
+  Serial.println(transmission.color);
   Serial.print("Antenna: ");
-  Serial.println(Transmission.antenna);
+  Serial.println(transmission.antenna);
 }
  
 void setup() {
