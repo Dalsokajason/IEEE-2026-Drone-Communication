@@ -5,31 +5,24 @@
 // Structure example to receive data
 // Must match the sender structure
 typedef struct struct_message {
-    char a[32];
-    int b;
-    float c;
-    bool d;
+    char color[32];
+    int antenna;
 } struct_message;
 
 
-// Create a struct_message called myData
-struct_message myData;
+// Create a struct_message called transmission
+struct_message transmission;
 
 
 // callback function that will be executed when data is received
 void OnDataRecv(const esp_now_recv_info_t *info, const uint8_t *incomingData, int len) {
-  memcpy(&myData, incomingData, sizeof(myData));
+  memcpy(&transmission, incomingData, sizeof(transmission));
   Serial.print("Bytes received: ");
   Serial.println(len);
-  Serial.print("Char: ");
-  Serial.println(myData.a);
-  Serial.print("Int: ");
-  Serial.println(myData.b);
-  Serial.print("Float: ");
-  Serial.println(myData.c);
-  Serial.print("Bool: ");
-  Serial.println(myData.d);
-  Serial.println();
+  Serial.print("Color Detected: ");
+  Serial.println(transmission.color);
+  Serial.print("Antenna: ");
+  Serial.println(transmission.antenna);
 }
  
 void setup() {
