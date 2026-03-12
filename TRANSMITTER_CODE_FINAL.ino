@@ -18,7 +18,7 @@ int antennaCycle = 0; //tracks how many antenna we've read starting from zero. U
 bool ENABLE = true;
 bool timerActive = false;
 unsigned long startTime = 0;
-unsigned long runDuration = 10000; // duration in ms (10 seconds)
+unsigned long runDuration = 120000; // duration in ms (2 minutes)
 
 // RECEIVER DRONE ESP32 MAC Address: e0:8c:fe:5d:ca:6c
 uint8_t broadcastAddress[] = {0xE0, 0x8C, 0xFE, 0x5D, 0xCA, 0x6C};
@@ -165,7 +165,7 @@ void setup() {
 }
 
 void loop() {
-  if(ENABLE && !timerActive){
+  if(Serial.available() && !timerActive){
     startTime = millis(); // start timer
     timerActive = true;
   }
@@ -224,3 +224,4 @@ void loop() {
     //antennaCycle++;
   }
 }
+
