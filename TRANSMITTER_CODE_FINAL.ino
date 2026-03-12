@@ -33,15 +33,15 @@ Color classify(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
   // i put purple first to try to get it to recognize purple before blue
   //try changing the bn, rn & gn to identify purple better
   //BUT be careful with not getting it confused with blue  
- 
- /*James say hello but patty kill sammy
- This work by bn gn and rn being the color divided by c which is the brightness
- so the threshold of purple is all being .3 since purple is very potent in all
- color next is the main color is higher then the other so for it to register as
- green gn has to be higher then bn and rn the same for the other colors
- it makes sense right green would have more green then blue and red
- and red would have more red then green and red
- ** I got rid of the +.10 for them since sometimes they might be similar */
+
+  /*James say hello but patty kill sammy
+  This work by bn gn and rn being the color divided by c which is the brightness
+  so the threshold of purple is all being .3 since purple is very potent in all
+  color next is the main color is higher then the other so for it to register as
+  green gn has to be higher then bn and rn the same for the other colors
+  it makes sense right green would have more green then blue and red
+  and red would have more red then green and red
+  ** I got rid of the +.10 for them since sometimes they might be similar */
 
   if (bn > 0.3 && rn > 0.3 && gn > 0.3) return PURPLE ;
 
@@ -50,17 +50,17 @@ Color classify(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
   else if (bn >= 0.35 && bn >= rn && bn >= gn) return BLUE;
 
   else if (rn > 0.35 && rn >= gn  && rn >= bn ) return RED;
- 
-  else return UNKNOWN;
-}
 
-const char* colorName(Color c) {
-  switch (c) {
-    case RED: return "RED";
-    case GREEN: return "GREEN";
-    case BLUE: return "BLUE";
-    case PURPLE: return "PURPLE";
-    default: return "UNKNOWN";
+  else return UNKNOWN;
+  }
+
+  const char* colorName(Color c) {
+    switch (c) {
+      case RED: return "RED";
+      case GREEN: return "GREEN";
+      case BLUE: return "BLUE";
+      case PURPLE: return "PURPLE";
+      default: return "UNKNOWN";
   }
 }
 
@@ -89,8 +89,8 @@ boolean confirmColor(Color colorRecord[], Color detectedColor) {
 // Structure example to send data
 // Must match the receiver structure
 typedef struct struct_message {
-  char color[32];
-  int antenna;
+char color[32];
+int antenna;
 } struct_message;
 
 
@@ -102,7 +102,8 @@ esp_now_peer_info_t peerInfo;
 
 
 // callback when data is sent
-void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
+//void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
+void OnDataSent(const wifi_tx_info_t *info, esp_now_send_status_t status) {
   Serial.print("\r\nLast Packet Send Status:\t");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
 }
@@ -111,19 +112,19 @@ void transmitData(String confirmedColor, int antennaID) {
   // Set values to send
   strcpy(transmission.color, confirmedColor.c_str());
   transmission.antenna = antennaID;
- 
+
   // Send message via ESP-NOW
   esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &transmission, sizeof(transmission));
-   
+  
   if (result == ESP_OK) {
     Serial.println("Sent with success");
   }
   else {
     Serial.println("Error sending the data");
   }
-}
+  }
 
-void setup() {
+  void setup() {
   Serial.begin(115200);
   delay(300);
 
@@ -131,12 +132,12 @@ void setup() {
     Serial.println("TCS34725 not found.");
     while (1) delay(10);
   }
-  
+
   Serial.println("TCS34725 ready.");
 
   // Init Serial Monitor
   Serial.begin(115200);
- 
+
   // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
 
@@ -151,12 +152,12 @@ void setup() {
   // Once ESPNow is successfully Init, we will register for Send CB to
   // get the status of Transmitted packet
   esp_now_register_send_cb(OnDataSent);
- 
+
   // Register peer
   memcpy(peerInfo.peer_addr, broadcastAddress, 6);
   peerInfo.channel = 0;  
   peerInfo.encrypt = false;
- 
+
   // Add peer        
   if (esp_now_add_peer(&peerInfo) != ESP_OK){
     Serial.println("Failed to add peer");
@@ -165,63 +166,60 @@ void setup() {
 }
 
 void loop() {
-  if(Serial.available() && !timerActive){
-    startTime = millis(); // start timer
-    timerActive = true;
+  int start_time;
+  while(!Serial.available()){
+    start_time = millis();
   }
+  uint16_t r, g, b, c;
+  tcs.getRawData(&r, &g, &b, &c);
   
-  if (timerActive && millis() - startTime <= runDuration) {
-    uint16_t r, g, b, c;
-    tcs.getRawData(&r, &g, &b, &c);
-    
-    Color col = classify(r, g, b, c);
-    
-    float rn = (c ? (float)r / c : 0);
-    float gn = (c ? (float)g / c : 0);
-    float bn = (c ? (float)b / c : 0);
-    
-    Serial.print("Raw R:"); Serial.print(r);
-    Serial.print(" G:"); Serial.print(g);
-    Serial.print(" B:"); Serial.print(b);
-    Serial.print(" C:"); Serial.print(c);
-    
-    Serial.print(" | rn="); Serial.print(rn, 3);
-    Serial.print(" gn="); Serial.print(gn, 3);
-    Serial.print(" bn="); Serial.print(bn, 3);
-    
-    Serial.print(" -> ");
-    Serial.println(colorName(col));
+  Color col = classify(r, g, b, c);
   
-    //Record the color detected
-    colorRecord[cycle] = col;
+  float rn = (c ? (float)r / c : 0);
+  float gn = (c ? (float)g / c : 0);
+  float bn = (c ? (float)b / c : 0);
+
+  //DEBUG COLOR RGB VALUES
+  //Serial.print("Raw R:"); Serial.print(r);
+  //Serial.print(" G:"); Serial.print(g);
+  //Serial.print(" B:"); Serial.print(b);
+  //Serial.print(" C:"); Serial.print(c);
   
-    if(cycle == confidenceValue - 1){
-      Serial.println("Cycle has reached the end");
-      if(confirmColor(colorRecord, col)){
-        confirmedColor = colorName(colorRecord[0]);
-        Serial.print("CONFIRMED COLOR:"); Serial.println(confirmedColor);
-        transmitData(confirmedColor, antennaID[antennaCycle]);
-        
-      }
-      cycle = 0;
+  //Serial.print(" | rn="); Serial.print(rn, 3);
+  //Serial.print(" gn="); Serial.print(gn, 3);
+  //Serial.print(" bn="); Serial.print(bn, 3);
+  
+  //Serial.print(" -> ");
+  //Serial.println(colorName(col));
+
+  //Record the color detected
+  colorRecord[cycle] = col;
+
+  if(cycle == confidenceValue - 1){
+    if(confirmColor(colorRecord, col)){
+      confirmedColor = colorName(colorRecord[0]);
+      Serial.print("CONFIRMED COLOR:"); Serial.println(confirmedColor);
+      transmitData(confirmedColor, antennaID[antennaCycle]);
+      
     }
-    else{
-      cycle++;
-    }
-  
-    for(int i = 0; i < confidenceValue; i++){
-      Serial.println(colorName(colorRecord[i]));
-    }
-  
-    Serial.println(cycle);
-    
-    delay(200);
+    cycle = 0;
+  }
+  else{
+    cycle++;
   }
 
-  //Stop when time expires
-  if (timerActive && millis() - startTime > runDuration) {
-    timerActive = false;
-    //antennaCycle++;
+  //DEGUB PRINT COLOR RECORD ARRAY
+  //for(int i = 0; i < confidenceValue; i++){
+  //  Serial.println(colorName(colorRecord[i]));
+  //}
+
+  //DEBUG TRACE CYCLE
+  //Serial.println(cycle);
+  
+  delay(200);
+  while(millis() - start_time > 120000){
+    
   }
 }
+
 
