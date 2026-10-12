@@ -34,7 +34,7 @@ Color classify(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
   //try changing the bn, rn & gn to identify purple better
   //BUT be careful with not getting it confused with blue  
 
-  /*James say hello but patty kill sammy
+  /*
   This work by bn gn and rn being the color divided by c which is the brightness
   so the threshold of purple is all being .3 since purple is very potent in all
   color next is the main color is higher then the other so for it to register as
